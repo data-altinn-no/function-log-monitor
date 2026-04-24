@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "APPINSIGHTS_APP_ID": "",
+    "APPINSIGHTS_API_KEY": "",
+    "GITHUB_TOKEN": "",
+    "GITHUB_INPUT_OWNER": "data-altinn-no",
+    "GITHUB_INPUT_REPO": "core-triage",
+    "TRIAGE_LABEL": "auto-triage",
+    "LOOKBACK_MINUTES": "30"
+  }
+}
