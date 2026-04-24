@@ -6,11 +6,15 @@ and posts one GitHub issue per **new** signature into the **private**
 landing-zone repo.
 
 ```
-App Insights ◄── KQL ── [Azure Function, timer 30m] ── creates issue ──► data-altinn-no/core-triage (private)
-                                                                                      │
-                                                                                      │ webhook
-                                                                                      ▼
-                                                                                 dan-agent
+┌──────────────┐   KQL query    ┌────────────────────────┐   create issue   ┌──────────────────────────────┐
+│ App Insights │ ◄───────────── │ Azure Function (30 min)│ ───────────────► │ data-altinn-no/core-triage   │
+└──────────────┘                │  redact + fingerprint  │                  │         (private)            │
+                                └────────────────────────┘                  └──────────────┬───────────────┘
+                                                                                           │ webhook
+                                                                                           ▼
+                                                                                      ┌──────────┐
+                                                                                      │ dan-agent│
+                                                                                      └──────────┘
 ```
 
 ## Layout
