@@ -31,30 +31,30 @@ public sealed class AppInsightsClient : IAppInsightsClient
     private const string KqlTemplate = """
         exceptions
         | where timestamp > ago({LOOKBACK}m)
-        | where cloud_RoleName startswith "data.altinn.no"
+        | where cloud_RoleName startswith "func"
         | summarize
-            count_    = count(),
-            sample    = any(pack(
-                            "type", type,
-                            "message", outerMessage,
-                            "details", tostring(details),
-                            "operation", operation_Name,
-                            "requestPath", tostring(customDimensions.RequestPath),
-                            "correlationId", operation_Id,
-                            "timestamp", timestamp
-                        ))
+            count_ = count(),
+            sampleException = any(pack(
+                "type", type,
+                "message", outerMessage,
+                "details", tostring(details),
+                "operation", operation_Name,
+                "requestPath", tostring(customDimensions["RequestPath"]),
+                "correlationId", operation_Id,
+                "timestamp", timestamp
+            ))
             by cloud_RoleName, problemId
         | project
             cloud_RoleName,
             problemId,
             count_,
-            exceptionType = tostring(sample.type),
-            message       = tostring(sample.message),
-            stackTrace    = tostring(sample.details),
-            operation     = tostring(sample.operation),
-            requestPath   = tostring(sample.requestPath),
-            correlationId = tostring(sample.correlationId),
-            firstSeen     = todatetime(sample.timestamp)
+            exceptionType = tostring(sampleException["type"]),
+            message       = tostring(sampleException["message"]),
+            stackTrace    = tostring(sampleException["details"]),
+            operation     = tostring(sampleException["operation"]),
+            requestPath   = tostring(sampleException["requestPath"]),
+            correlationId = tostring(sampleException["correlationId"]),
+            firstSeen     = todatetime(sampleException["timestamp"])
         | order by count_ desc
         """;
 
