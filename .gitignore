@@ -55,3 +55,5 @@ nunit-*.xml
 
 # Azure Functions local settings (contains secrets)
 local.settings.json
+/.vs
+/.github/upgrades/scenarios/dotnet-version-upgrade
