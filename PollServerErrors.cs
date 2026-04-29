@@ -6,10 +6,10 @@ using Microsoft.Extensions.Options;
 
 namespace FunctionLogMonitor;
 
-public sealed class PollExceptions
+public sealed class PollServerErrors
 {
     private const string IssueBodyTemplate = """
-        ### Exception
+        ### Error
         {0}
 
         ### Message
@@ -21,24 +21,21 @@ public sealed class PollExceptions
         ### Operation
         {3}
 
-        ### Request path
+        ### Timestamp
         {4}
 
-        ### Timestamp
+        ### Correlation id
         {5}
 
-        ### Correlation id
+        ### Occurrences
         {6}
 
-        ### Occurrences
-        {7}
-
         ### Fingerprint
-        {8}
+        {7}
 
         ### Stack trace
         ```
-        {9}
+        {8}
         ```
         """;
 
@@ -46,14 +43,14 @@ public sealed class PollExceptions
     private readonly IGitHubIssueWriter _github;
     private readonly IRedactor _redactor;
     private readonly MonitorOptions _opts;
-    private readonly ILogger<PollExceptions> _log;
+    private readonly ILogger<PollServerErrors> _log;
 
-    public PollExceptions(
+    public PollServerErrors(
         IAppInsightsClient appInsights,
         IGitHubIssueWriter github,
         IRedactor redactor,
         IOptions<MonitorOptions> opts,
-        ILogger<PollExceptions> log)
+        ILogger<PollServerErrors> log)
     {
         _appInsights = appInsights;
         _github = github;
@@ -62,7 +59,7 @@ public sealed class PollExceptions
         _log = log;
     }
 
-    [Function("PollExceptions")]
+    [Function("PollServerErrors")]
     public async Task RunAsync(
         [TimerTrigger("0 */30 * * * *", RunOnStartup = false)] TimerInfo timer,
         CancellationToken ct)
@@ -70,7 +67,7 @@ public sealed class PollExceptions
         var lookback = _opts.LookbackMinutes;
         _log.LogInformation("poll.start lookback={Lookback}m", lookback);
 
-        var rows = await _appInsights.QueryExceptionsAsync(lookback, ct);
+        var rows = await _appInsights.QueryServerErrorsAsync(lookback, ct);
         if (rows.Count == 0)
         {
             _log.LogInformation("poll.no_rows");
@@ -87,7 +84,7 @@ public sealed class PollExceptions
             ct.ThrowIfCancellationRequested();
 
             var excType = _redactor.Redact(string.IsNullOrEmpty(row.ExceptionType) ? "UnknownException" : row.ExceptionType);
-            var stack = _redactor.Redact(row.StackTrace);
+            var stack = _redactor.Redact(row.Message);
             var fingerprint = Fingerprint.Compute(excType, stack);
 
             if (existing.Contains(fingerprint)) continue;
@@ -97,8 +94,7 @@ public sealed class PollExceptions
                 excType,
                 _redactor.Redact(row.Message),
                 string.IsNullOrEmpty(row.CloudRoleName) ? "unknown" : row.CloudRoleName,
-                _redactor.Redact(row.Operation),
-                _redactor.Redact(row.RequestPath),
+                _redactor.Redact(row.Operation),               
                 row.FirstSeen,
                 row.CorrelationId,
                 row.Count > 0 ? row.Count : 1,
@@ -124,7 +120,7 @@ public sealed class PollExceptions
         _log.LogInformation("poll.done created={Created} total_rows={Total}", created, rows.Count);
     }
 
-    [Function("DebugPollExceptions")]
+    [Function("DebugServerErrors")]
     public async Task RunAsyncDebug([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequestData req,
             FunctionContext context)
     {
