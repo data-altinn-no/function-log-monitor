@@ -1,5 +1,6 @@
 using FunctionLogMonitor.Services;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -122,6 +123,14 @@ public sealed class PollExceptions
 
         _log.LogInformation("poll.done created={Created} total_rows={Total}", created, rows.Count);
     }
+
+    [Function("Debug")]
+    public async Task RunAsyncDebug([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequestData req,
+            FunctionContext context)
+    {
+        await RunAsync(new TimerInfo(), new CancellationToken());
+    }
+
 
     private static string Truncate(string s, int max) => s.Length <= max ? s : s[..max];
 }

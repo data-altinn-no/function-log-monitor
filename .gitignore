@@ -57,3 +57,9 @@ nunit-*.xml
 local.settings.json
 /.vs
 /.github/upgrades/scenarios/dotnet-version-upgrade
+
+# Azurite local storage emulator
+__azurite_db_*
+
+# VS service dependencies user file
+*.user
