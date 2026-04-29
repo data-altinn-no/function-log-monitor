@@ -10,7 +10,7 @@
     <UserSecretsId>76e7edf0-c77d-461c-9373-b388601e2b5e</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="local.settings.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+    <Content Include="local.settings.json" Condition="Exists('local.settings.json')" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
   </ItemGroup>
 
   <ItemGroup>
