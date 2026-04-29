@@ -5,7 +5,7 @@ namespace FunctionLogMonitor.Services;
 
 public interface IGitHubIssueWriter
 {
-    Task<IReadOnlySet<string>> GetRecentFingerprintsAsync(CancellationToken ct);
+    Task<IReadOnlySet<string>> GetRecentFingerprintsAsync(CancellationToken ct, string label);
     Task CreateIssueAsync(string title, string body, IEnumerable<string> labels, CancellationToken ct);
 }
 
@@ -24,14 +24,14 @@ public sealed class GitHubIssueWriter : IGitHubIssueWriter
         _opts = opts.Value;
     }
 
-    public async Task<IReadOnlySet<string>> GetRecentFingerprintsAsync(CancellationToken ct)
+    public async Task<IReadOnlySet<string>> GetRecentFingerprintsAsync(CancellationToken ct, string label)
     {
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var request = new RepositoryIssueRequest
         {
             State = ItemStateFilter.All,
         };
-        request.Labels.Add(_opts.TriageLabel);
+        request.Labels.Add(label);
 
         var options = new ApiOptions { PageSize = 100, PageCount = 5 };
         var issues = await _github.Issue.GetAllForRepository(

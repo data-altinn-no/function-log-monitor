@@ -8,7 +8,8 @@ public sealed class MonitorOptions
     [Required] public string AppInsightsApiKey { get; set; } = "";
     [Required] public string GitHubInputOwner { get; set; } = "";
     [Required] public string GitHubInputRepo { get; set; } = "";
-    public string TriageLabel { get; set; } = "auto-triage";
+    public string TriageLabelErrors { get; set; } = "";
+    public string TriageLabelExceptions { get; set; } = "";
     public int LookbackMinutes { get; set; } = 30;
 
     public void LoadFromEnvironment()
@@ -17,7 +18,8 @@ public sealed class MonitorOptions
         AppInsightsApiKey = Env("APPINSIGHTS_API_KEY");
         GitHubInputOwner = Env("GITHUB_INPUT_OWNER");
         GitHubInputRepo = Env("GITHUB_INPUT_REPO");
-        TriageLabel = EnvOr("TRIAGE_LABEL", "auto-triage");
+        TriageLabelErrors = Env("TRIAGE_LABEL_ERRORS");
+        TriageLabelExceptions = Env("TRIAGE_LABEL_EXCEPTIONS");
         LookbackMinutes = int.TryParse(EnvOr("LOOKBACK_MINUTES", "30"), out var v) ? v : 30;
     }
 

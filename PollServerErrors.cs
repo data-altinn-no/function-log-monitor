@@ -75,7 +75,7 @@ public sealed class PollServerErrors
         }
 
         var existing = new HashSet<string>(
-            await _github.GetRecentFingerprintsAsync(ct),
+            await _github.GetRecentFingerprintsAsync(ct, _opts.TriageLabelErrors),
             StringComparer.Ordinal);
 
         var created = 0;
@@ -110,7 +110,7 @@ public sealed class PollServerErrors
             await _github.CreateIssueAsync(
                 title,
                 body,
-                new[] { _opts.TriageLabel, "prod", "source:app-insights" },
+                new[] { _opts.TriageLabelErrors, "prod", "source:app-insights" },
                 ct);
 
             existing.Add(fingerprint);
