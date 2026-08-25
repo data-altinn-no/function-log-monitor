@@ -90,7 +90,7 @@ public sealed class PollExceptions
             var stack = _redactor.Redact(row.StackTrace);
             var fingerprint = Fingerprint.Compute(excType, stack);
 
-            if (existing.Contains(fingerprint)) continue;
+            if (existing.Contains(fingerprint) || excType.StartsWith("Dan.")) continue;
 
             var body = string.Format(
                 IssueBodyTemplate,
