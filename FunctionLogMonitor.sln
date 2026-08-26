@@ -5,6 +5,10 @@ VisualStudioVersion = 18.5.11716.220 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionLogMonitor", "FunctionLogMonitor.csproj", "{4349B7DD-ABEF-0E50-9693-1D1B37A05EEC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{AC685C5A-E9F7-429B-A3E1-8041BFBA9BF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionLogMonitor.Tests", "tests\FunctionLogMonitor.Tests\FunctionLogMonitor.Tests.csproj", "{FFED3CD0-1D67-4E07-9474-20A8E0A941B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,11 +19,18 @@ Global
 		{4349B7DD-ABEF-0E50-9693-1D1B37A05EEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4349B7DD-ABEF-0E50-9693-1D1B37A05EEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4349B7DD-ABEF-0E50-9693-1D1B37A05EEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFED3CD0-1D67-4E07-9474-20A8E0A941B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFED3CD0-1D67-4E07-9474-20A8E0A941B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFED3CD0-1D67-4E07-9474-20A8E0A941B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFED3CD0-1D67-4E07-9474-20A8E0A941B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5D597989-50F3-4A55-AE79-BD2F062DED51}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FFED3CD0-1D67-4E07-9474-20A8E0A941B9} = {AC685C5A-E9F7-429B-A3E1-8041BFBA9BF7}
 	EndGlobalSection
 EndGlobal

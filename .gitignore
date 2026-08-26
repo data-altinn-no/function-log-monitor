@@ -63,3 +63,6 @@ __azurite_db_*
 
 # VS service dependencies user file
 *.user
+
+# macOS
+.DS_Store

@@ -36,6 +36,11 @@ public sealed class PollExceptions
         ### Fingerprint
         {8}
 
+        ### Top frame
+        ```
+        {10}
+        ```
+
         ### Stack trace
         ```
         {9}
@@ -86,11 +91,28 @@ public sealed class PollExceptions
         {
             ct.ThrowIfCancellationRequested();
 
-            var excType = _redactor.Redact(string.IsNullOrEmpty(row.ExceptionType) ? "UnknownException" : row.ExceptionType);
-            var stack = _redactor.Redact(row.StackTrace);
-            var fingerprint = Fingerprint.Compute(excType, stack);
+            if (created >= _opts.MaxIssuesPerRun)
+            {
+                _log.LogWarning("poll.run_cap_reached cap={Cap} remaining={Remaining}",
+                    _opts.MaxIssuesPerRun, rows.Count - created);
+                break;
+            }
 
-            if (existing.Contains(fingerprint) || excType.StartsWith("Dan.")) continue;
+            var excType = string.IsNullOrEmpty(row.ExceptionType) ? "UnknownException" : row.ExceptionType;
+
+            if (ExceptionClassifier.ShouldSkip(excType, row.Message)) continue;
+
+            var fingerprint = Fingerprint.Compute(excType, row.StackTrace);
+
+            if (existing.Contains(fingerprint)) continue;
+
+            excType = _redactor.Redact(excType);
+
+            var flattened = StackFlattener.Flatten(row.StackTrace);
+            var stack = _redactor.Redact(
+                string.IsNullOrEmpty(flattened) ? row.StackTrace : flattened);
+            var top = StackFlattener.TopFirstPartyFrame(row.StackTrace);
+            var topFrame = top is null ? "(no first-party frame)" : StackFlattener.Format(top.Value);
 
             var body = string.Format(
                 IssueBodyTemplate,
@@ -103,9 +125,20 @@ public sealed class PollExceptions
                 row.CorrelationId,
                 row.Count > 0 ? row.Count : 1,
                 $"{GitHubIssueWriter.FingerprintMarker} {fingerprint} -->",
-                Truncate(stack, 8000));
+                Truncate(stack, 8000),
+                _redactor.Redact(topFrame));
 
             _redactor.AssertClean(body);
+
+            if (_opts.DryRun)
+            {
+                _log.LogInformation(
+                    "poll.would_create fingerprint={Fingerprint} occurrences={Count} type={Type} role={Role}",
+                    fingerprint, row.Count, excType, row.CloudRoleName);
+                existing.Add(fingerprint);
+                created++;
+                continue;
+            }
 
             var title = Truncate(
                 $"[prod] {excType} in {(string.IsNullOrEmpty(row.CloudRoleName) ? "unknown" : row.CloudRoleName)}",

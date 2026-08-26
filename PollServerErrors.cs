@@ -83,11 +83,20 @@ public sealed class PollServerErrors
         {
             ct.ThrowIfCancellationRequested();
 
-            var excType = _redactor.Redact(string.IsNullOrEmpty(row.ExceptionType) ? "UnknownException" : row.ExceptionType);
-            var stack = _redactor.Redact(row.Message);
-            var fingerprint = Fingerprint.Compute(excType, stack);
+            if (created >= _opts.MaxIssuesPerRun)
+            {
+                _log.LogWarning("poll.run_cap_reached cap={Cap} remaining={Remaining}",
+                    _opts.MaxIssuesPerRun, rows.Count - created);
+                break;
+            }
+
+            var excType = string.IsNullOrEmpty(row.ExceptionType) ? "UnknownException" : row.ExceptionType;
+
+            var fingerprint = Fingerprint.ComputeFromTemplate(row.CloudRoleName, row.Template);
 
             if (existing.Contains(fingerprint)) continue;
+
+            var stack = _redactor.Redact(row.Message);
 
             var body = string.Format(
                 IssueBodyTemplate,
@@ -102,6 +111,16 @@ public sealed class PollServerErrors
                 Truncate(stack, 8000));
 
             _redactor.AssertClean(body);
+
+            if (_opts.DryRun)
+            {
+                _log.LogInformation(
+                    "poll.would_create fingerprint={Fingerprint} occurrences={Count} role={Role} template={Template}",
+                    fingerprint, row.Count, row.CloudRoleName, Truncate(row.Template, 200));
+                existing.Add(fingerprint);
+                created++;
+                continue;
+            }
 
             var title = Truncate(
                 $"[prod] {excType} in {(string.IsNullOrEmpty(row.CloudRoleName) ? "unknown" : row.CloudRoleName)}",

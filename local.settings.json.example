@@ -7,8 +7,15 @@
     "APPINSIGHTS_API_KEY": "",
     "GITHUB_TOKEN": "",
     "GITHUB_INPUT_OWNER": "data-altinn-no",
-    "GITHUB_INPUT_REPO": "core-triage",
-    "TRIAGE_LABEL": "auto-triage",
-    "LOOKBACK_MINUTES": "30"
+    "GITHUB_INPUT_REPO": "log-triage",
+    "LOOKBACK_MINUTES": "30",
+    "TRIAGE_LABEL_ERRORS": "auto-triage-errors",
+    "TRIAGE_LABEL_EXCEPTIONS": "auto-triage-exceptions",
+    "COUNT_WINDOW_HOURS": "24",
+    "MIN_OCCURRENCES_EXCEPTIONS": "1",
+    "MIN_OCCURRENCES_TRACES": "25",
+    "MAX_ISSUES_PER_RUN": "5",
+    "MAX_QUERY_ROWS": "25",
+    "DRY_RUN": "true"
   }
 }
