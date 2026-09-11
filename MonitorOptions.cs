@@ -17,8 +17,8 @@ public sealed class MonitorOptions
         GitHubAppClientId.Length > 0
         && GitHubAppInstallationId > 0
         && GitHubAppPrivateKey.Length > 0;
-    public string TriageLabelErrors { get; set; } = "";
-    public string TriageLabelExceptions { get; set; } = "";
+    [Required] public string TriageLabelErrors { get; set; } = "";
+    [Required] public string TriageLabelExceptions { get; set; } = "";
     public int LookbackMinutes { get; set; } = 30;
 
     public int CountWindowHours { get; set; } = 24;
