@@ -23,7 +23,6 @@ public sealed class MonitorOptions
 
     public int CountWindowHours { get; set; } = 24;
 
-    // 1 = no threshold, deliberately: raising it drops rare-but-real defects.
     public int MinOccurrencesExceptions { get; set; } = 1;
 
     public int MinOccurrencesTraces { get; set; } = 25;
@@ -47,7 +46,7 @@ public sealed class MonitorOptions
         TriageLabelExceptions = Env("TRIAGE_LABEL_EXCEPTIONS");
         LookbackMinutes = int.TryParse(EnvOr("LOOKBACK_MINUTES", "30"), out var v) ? v : 30;
         CountWindowHours = IntOr("COUNT_WINDOW_HOURS", 24);
-        MinOccurrencesExceptions = IntOr("MIN_OCCURRENCES_EXCEPTIONS", 3);
+        MinOccurrencesExceptions = IntOr("MIN_OCCURRENCES_EXCEPTIONS", 1);
         MinOccurrencesTraces = IntOr("MIN_OCCURRENCES_TRACES", 25);
         MaxIssuesPerRun = IntOr("MAX_ISSUES_PER_RUN", 5);
         MaxQueryRows = IntOr("MAX_QUERY_ROWS", 25);
