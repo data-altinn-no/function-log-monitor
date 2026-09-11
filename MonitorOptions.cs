@@ -8,6 +8,15 @@ public sealed class MonitorOptions
     [Required] public string AppInsightsApiKey { get; set; } = "";
     [Required] public string GitHubInputOwner { get; set; } = "";
     [Required] public string GitHubInputRepo { get; set; } = "";
+    public string GitHubToken { get; set; } = "";
+    public string GitHubAppClientId { get; set; } = "";
+    public long GitHubAppInstallationId { get; set; }
+    public string GitHubAppPrivateKey { get; set; } = "";
+
+    public bool UsesGitHubApp =>
+        GitHubAppClientId.Length > 0
+        && GitHubAppInstallationId > 0
+        && GitHubAppPrivateKey.Length > 0;
     public string TriageLabelErrors { get; set; } = "";
     public string TriageLabelExceptions { get; set; } = "";
     public int LookbackMinutes { get; set; } = 30;
@@ -30,6 +39,10 @@ public sealed class MonitorOptions
         AppInsightsApiKey = Env("APPINSIGHTS_API_KEY");
         GitHubInputOwner = Env("GITHUB_INPUT_OWNER");
         GitHubInputRepo = Env("GITHUB_INPUT_REPO");
+        GitHubToken = Env("GITHUB_TOKEN");
+        GitHubAppClientId = Env("GITHUB_APP_CLIENT_ID");
+        GitHubAppInstallationId = LongOr("GITHUB_APP_INSTALLATION_ID", 0);
+        GitHubAppPrivateKey = Env("GITHUB_APP_PRIVATE_KEY");
         TriageLabelErrors = Env("TRIAGE_LABEL_ERRORS");
         TriageLabelExceptions = Env("TRIAGE_LABEL_EXCEPTIONS");
         LookbackMinutes = int.TryParse(EnvOr("LOOKBACK_MINUTES", "30"), out var v) ? v : 30;
@@ -49,4 +62,7 @@ public sealed class MonitorOptions
 
     private static int IntOr(string name, int fallback) =>
         int.TryParse(Environment.GetEnvironmentVariable(name), out var v) ? v : fallback;
+
+    private static long LongOr(string name, long fallback) =>
+        long.TryParse(Environment.GetEnvironmentVariable(name), out var v) ? v : fallback;
 }

@@ -48,17 +48,24 @@ landing-zone repo.
 | --------------------- | ------------------------------------------------------------------- |
 | `APPINSIGHTS_APP_ID`  | App Insights API "Application ID"                                   |
 | `APPINSIGHTS_API_KEY` | App Insights read-only API key (or use Managed Identity — see note) |
-| `GITHUB_TOKEN`        | Fine-grained PAT with `issues:write` on `log-triage`               |
+| `GITHUB_APP_CLIENT_ID` | GitHub App Client ID (`Iv23li…`); the numeric App ID also works   |
+| `GITHUB_APP_INSTALLATION_ID` | Installation ID of the App on this org                      |
+| `GITHUB_APP_PRIVATE_KEY` | App private key, PEM or base64-encoded PEM (Key Vault)         |
+| `GITHUB_TOKEN`        | PAT fallback, used only when the App settings are absent            |
 | `GITHUB_INPUT_OWNER`  | `data-altinn-no`                                                    |
 | `GITHUB_INPUT_REPO`   | `log-triage`                                                       |
 | `TRIAGE_LABEL_EXCEPTIONS` | `auto-triage-exceptions`                                        |
 | `TRIAGE_LABEL_ERRORS`     | `auto-triage-errors`                                            |
 | `LOOKBACK_MINUTES`    | `30` (match the timer cadence)                                      |
 
+Authentication prefers the GitHub App: when the three `GITHUB_APP_*` settings
+are present the monitor mints a fresh installation token per hour and issues are
+authored by `dan-log-triage[bot]`. A PAT authors issues as the person who owns
+it, which auto-subscribes them to every issue the monitor files.
+
 **Recommended (prod):** use a **User-Assigned Managed Identity** granted
 `Log Analytics Reader` on the App Insights workspace and swap the API-key path
-for `Azure.Monitor.Query` + `DefaultAzureCredential`. Octokit already accepts
-a GitHub App installation token if you prefer that over a PAT.
+for `Azure.Monitor.Query` + `DefaultAzureCredential`.
 
 ## Local dev
 

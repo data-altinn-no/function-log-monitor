@@ -15,12 +15,12 @@ public sealed class GitHubIssueWriter : IGitHubIssueWriter
     private const string MarkerClose = "-->";
     private const int FingerprintScanLimit = 500;
 
-    private readonly IGitHubClient _github;
+    private readonly IGitHubClientFactory _clients;
     private readonly MonitorOptions _opts;
 
-    public GitHubIssueWriter(IGitHubClient github, IOptions<MonitorOptions> opts)
+    public GitHubIssueWriter(IGitHubClientFactory clients, IOptions<MonitorOptions> opts)
     {
-        _github = github;
+        _clients = clients;
         _opts = opts.Value;
     }
 
@@ -34,7 +34,8 @@ public sealed class GitHubIssueWriter : IGitHubIssueWriter
         request.Labels.Add(label);
 
         var options = new ApiOptions { PageSize = 100, PageCount = 5 };
-        var issues = await _github.Issue.GetAllForRepository(
+        var github = await _clients.GetClientAsync(ct);
+        var issues = await github.Issue.GetAllForRepository(
             _opts.GitHubInputOwner, _opts.GitHubInputRepo, request, options);
 
         foreach (var issue in issues)
@@ -53,7 +54,8 @@ public sealed class GitHubIssueWriter : IGitHubIssueWriter
     {
         var req = new NewIssue(title) { Body = body };
         foreach (var label in labels) req.Labels.Add(label);
-        await _github.Issue.Create(_opts.GitHubInputOwner, _opts.GitHubInputRepo, req);
+        var github = await _clients.GetClientAsync(ct);
+        await github.Issue.Create(_opts.GitHubInputOwner, _opts.GitHubInputRepo, req);
     }
 
     internal static string? ExtractFingerprint(string? body)
