@@ -47,7 +47,7 @@ jobs:
           popd
       
       - name: Login to Azure
-        uses: azure/login@eec3c95657c1536435858eda1f3ff5437fee8474 # v2.3.0
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_460A2E0B242F49489D6487742B3DC366 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_EDFECEEB70144446B983F88409364B61 }}
