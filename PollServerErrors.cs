@@ -94,7 +94,13 @@ public sealed class PollServerErrors
 
             var fingerprint = Fingerprint.ComputeFromTemplate(row.CloudRoleName, row.Template);
 
-            if (existing.Contains(fingerprint)) continue;
+            if (existing.Contains(fingerprint))
+            {
+                _log.LogInformation(
+                    "poll.dupe fingerprint={Fingerprint} role={Role} template={Template}",
+                    fingerprint, row.CloudRoleName, Truncate(row.Template ?? "", 200));
+                continue;
+            }
 
             var stack = _redactor.Redact(row.Message);
 
@@ -136,7 +142,9 @@ public sealed class PollServerErrors
             created++;
         }
 
-        _log.LogInformation("poll.done created={Created} total_rows={Total}", created, rows.Count);
+        _log.LogInformation(
+            "poll.done created={Created} total_rows={Total} known_fingerprints={Known}",
+            created, rows.Count, existing.Count);
     }
 
     [Function("DebugServerErrors")]

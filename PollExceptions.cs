@@ -100,11 +100,21 @@ public sealed class PollExceptions
 
             var excType = string.IsNullOrEmpty(row.ExceptionType) ? "UnknownException" : row.ExceptionType;
 
-            if (ExceptionClassifier.ShouldSkip(excType, row.Message)) continue;
+            if (ExceptionClassifier.ShouldSkip(excType, row.Message))
+            {
+                _log.LogInformation("poll.classified_skip type={Type} role={Role}",
+                    excType, row.CloudRoleName);
+                continue;
+            }
 
             var fingerprint = Fingerprint.Compute(excType, row.StackTrace);
 
-            if (existing.Contains(fingerprint)) continue;
+            if (existing.Contains(fingerprint))
+            {
+                _log.LogInformation("poll.dupe fingerprint={Fingerprint} type={Type} role={Role}",
+                    fingerprint, excType, row.CloudRoleName);
+                continue;
+            }
 
             excType = _redactor.Redact(excType);
 
@@ -154,7 +164,9 @@ public sealed class PollExceptions
             created++;
         }
 
-        _log.LogInformation("poll.done created={Created} total_rows={Total}", created, rows.Count);
+        _log.LogInformation(
+            "poll.done created={Created} total_rows={Total} known_fingerprints={Known}",
+            created, rows.Count, existing.Count);
     }
 
     [Function("DebugPollExceptions")]
