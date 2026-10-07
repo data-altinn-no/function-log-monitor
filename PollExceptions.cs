@@ -107,7 +107,10 @@ public sealed class PollExceptions
                 continue;
             }
 
-            var fingerprint = Fingerprint.Compute(excType, row.StackTrace);
+            var methods = StackFlattener.FirstPartyFrames(row.StackTrace).Select(f => f.Method).ToList();
+            var fingerprint = methods.Count > 0
+                ? Fingerprint.ComputeFromFrames(excType, methods)
+                : Fingerprint.Compute(excType, row.StackTrace);
 
             if (existing.Contains(fingerprint))
             {

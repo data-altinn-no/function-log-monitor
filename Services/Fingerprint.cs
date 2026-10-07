@@ -29,6 +29,39 @@ public static class Fingerprint
         return output.Trim();
     }
 
+    private const int SignatureFrames = 5;
+
+    // Compiler-generated names carry ordinals that are renumbered on rebuild.
+    private static readonly (Regex Pattern, string Replacement)[] MethodRules =
+    {
+        (new Regex(@"<(\w+)>g__(\w+)\|\d+_\d+", RegexOptions.Compiled), "$1.$2"),
+        (new Regex(@"<(\w+)>[a-z]__\d+(_\d+)?", RegexOptions.Compiled), "$1"),
+        (new Regex(@"<>c(__DisplayClass\d+_\d+)?", RegexOptions.Compiled), ""),
+        (new Regex(@"\.MoveNext$", RegexOptions.Compiled), ""),
+        (new Regex(@"`\d+", RegexOptions.Compiled), ""),
+        (new Regex(@"[+.]+", RegexOptions.Compiled), "."),
+    };
+
+    public static string NormalizeMethod(string method)
+    {
+        var output = method;
+        foreach (var (pattern, replacement) in MethodRules)
+            output = pattern.Replace(output, replacement);
+        return output.Trim('.');
+    }
+
+    /// <summary>Type plus first-party method names, so a redeploy does not re-file the same error.</summary>
+    public static string ComputeFromFrames(string? exceptionType, IEnumerable<string> methods)
+    {
+        // An outer and inner exception share the call path, so a method can recur.
+        var signature = methods
+            .Select(NormalizeMethod)
+            .Where(m => m.Length > 0)
+            .Distinct(StringComparer.Ordinal)
+            .Take(SignatureFrames);
+        return Hash($"frames\n{exceptionType ?? ""}\n{string.Join("\n", signature)}");
+    }
+
     private static string Hash(string input) =>
         Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(input)))
                .ToLowerInvariant()[..16];

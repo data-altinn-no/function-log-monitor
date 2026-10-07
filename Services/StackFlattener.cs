@@ -50,6 +50,17 @@ public static class StackFlattener
                 .FirstOrDefault())
             .FirstOrDefault(f => f is not null);
 
+    // Innermost exception first, matching TopFirstPartyFrame.
+    public static IReadOnlyList<Frame> FirstPartyFrames(string? detailsJson) =>
+        Parse(detailsJson)
+            .AsEnumerable()
+            .Reverse()
+            .SelectMany(e => e.Frames
+                .Where(f => IsFirstParty(f.Assembly)
+                         && !f.FileName.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(f => f.Level))
+            .ToList();
+
     public static string Format(Frame f) =>
         f.Line > 0 && !string.IsNullOrEmpty(f.FileName)
             ? $"   at {f.Method}() in {f.FileName}:line {f.Line}"
